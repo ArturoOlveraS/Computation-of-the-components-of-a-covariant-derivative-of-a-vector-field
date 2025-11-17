@@ -1,0 +1,51 @@
+<< xAct`xCoba`
+$PrePrint = ScreenDollarIndices;
+(*Setting up the Manifold, Chart and Metric*)
+DefManifold[M, 4, IndexRange[a, p]]
+DefMetric[-1, metric[-a, -b], CD, SymbolOfCovD -> {":", "\[Del]"}, PrintAs -> "g"]
+ChristoffelCD[a, -b, -c] // ChristoffelToMetric
+
+(*Defining the chart*)
+
+DefChart[B, M, {0, 1, 2, 3}, {t[], r[], \[Theta][], \[Phi][]}]
+DefConstantSymbol[mass, PrintAs -> "m"]
+DefParameter[alpha, PrintAs -> "a"]
+
+MatrixForm[met = {
+   {-1, 0, 0, 0},
+   {0, 1, 0, 0},
+   {0, 0, r[]^2, 0},
+   {0, 0, 0, r[]^2 Sin[\[Theta][]]^2}
+   }]
+
+MetricInBasis[metric, -B, met]
+TableOfComponents[metric[-a, -b], {-a, -B}, {-b, -B}] // ToValues // MatrixForm
+MetricCompute[metric, B, All, CVSimplify -> Simplify, Verbose -> False]
+
+(*Inverse metric*)
+
+TableOfComponents[metric[a, b], {a, B}, {b, B}] // ToValues // MatrixForm
+
+(*Christoffel symbols*)
+
+TableOfComponents[ToBasis[B][Christoffel[CD, PDB][a, -b, -c]], {a, B}, {-b, -B}, {-c, -B}] //ToValues ;
+
+(*Ricci Scalar*)
+
+ToBasis[B][RicciScalarCD[]] // ToValues // FullSimplify
+TableOfComponents[ToBasis[B][RicciCD[-a, -b]], {-a, -B}, {-b, -B}] // ToValues // MatrixForm
+
+
+(*Defining the Vector Field*)
+DefScalarFunction[F]
+DefTensor[V[-a], M]
+values = {0, F[r[]], 0, 0}
+V[-{a, B}] // ComponentArray
+ComponentValue[V[-{a, B}] // ComponentArray, values]
+BasisExpand[ChangeCovD[CD[-a][V[-b]], CD, PDB], B] // ToBasis[B] // ToValues // ComponentArray // MatrixForm
+
+DependenciesOfTensor@metric ^= {M, alpha}; 
+DependenciesOfTensor@RicciCD ^= {M, alpha};
+
+TableOfComponents[ParamD[alpha]@metric[-a, -b], -{a, B}, -{b, B}] // ToValues // FullSimplify // MatrixForm
+TableOfComponents[ToBasis[B][RicciCD[-a, -b]], {-a, -B}, {-b, -B}] // ToValues // MatrixForm
